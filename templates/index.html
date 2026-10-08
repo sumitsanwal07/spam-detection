@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Spam Message Checker</title>
+  <style>
+    body{font-family:system-ui,sans-serif;background:#0f172a;color:#e2e8f0;display:flex;justify-content:center;padding:40px 16px;margin:0}
+    .card{background:#1e293b;max-width:560px;width:100%;padding:28px;border-radius:16px}
+    h1{margin-top:0}
+    textarea{width:100%;height:140px;padding:12px;border-radius:10px;border:1px solid #475569;background:#0f172a;color:inherit;font-size:16px;box-sizing:border-box;resize:vertical}
+    button{margin-top:12px;padding:12px 22px;border:0;border-radius:10px;background:#6366f1;color:#fff;font-size:16px;cursor:pointer}
+    button:hover{background:#4f46e5}
+    #result{margin-top:20px;padding:16px;border-radius:10px;font-size:18px;display:none}
+    .spam{background:#7f1d1d}.ham{background:#14532d}
+    small{display:block;margin-top:6px;opacity:.8;font-size:14px}
+    .ex{margin-top:16px;font-size:14px}.ex a{color:#a5b4fc;cursor:pointer;margin-right:12px}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>📩 Spam Checker</h1>
+    <p>Paste any SMS / message below and check if it is spam.</p>
+    <textarea id="msg" placeholder="Type or paste a message..."></textarea>
+    <button onclick="check()">Check Message</button>
+    <div class="ex">Try:
+      <a onclick="fill('Congratulations! You won Rs 50000. Click http://bit.ly/win123 to claim now')">spam example</a>
+      <a onclick="fill('Hey, are we meeting for lunch at 1 pm?')">normal example</a>
+    </div>
+    <div id="result"></div>
+  </div>
+<script>
+function fill(t){document.getElementById('msg').value=t}
+async function check(){
+  const message=document.getElementById('msg').value;
+  const box=document.getElementById('result');
+  const res=await fetch('/predict',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message})});
+  const data=await res.json();
+  box.style.display='block';
+  if(!res.ok){box.className='';box.textContent=data.error;return}
+  box.className=data.label;
+  box.innerHTML=(data.label==='spam'?'🚫 This looks like SPAM':'✅ This looks safe (NOT spam)')
+    +'<small>Spam probability: '+data.spam_probability+'%</small>';
+}
+</script>
+</body>
+</html>
